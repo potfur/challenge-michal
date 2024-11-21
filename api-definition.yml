@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  ## TODO OpenAPI: change the name of API to appropriate one
+  title: Microservice Template API
+  ## TODO OpenAPI: add relevant description about API
+  description: |
+    ## Overview
+    This API intended to be an example of microservice API definition
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: info@tooltime.de
+  license:
+    name: Apache 2.0
+    url: https://apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: "/"
+    description: "Microservice Template API (Local env)"
+  - url: "https://template.staging.car-dino.de"
+    description: "Microservice Template API (Staging)"
+  - url: "https://template.car-dino.de"
+    description: "Microservice Template API (Production)"
+
+paths:
+  /samples:
+    post:
+      summary: Create a new sample object
+      description: This method creates a new sample object and stores in in-memory repository
+      operationId: createSample
+      tags:
+        - Samples
+      requestBody:
+        description: Request for a new sample creation
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSampleRequest'
+      responses:
+        200:
+          description: Sample
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SampleDto'
+        400:
+          $ref: '#/components/responses/BadRequestError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Get a list of all samples
+      operationId: getSamples
+      tags:
+        - Samples
+      responses:
+        200:
+          description: Full list of samples
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SampleDto'
+
+components:
+
+  responses:
+    UnauthorizedError:
+      description: "Authorization is missing or invalid"
+    BadRequestError:
+      description: "Request does not conform to the schema (e.g. not all required fields are provided)"
+    NotFoundError:
+      description: "The resource you are trying to access does not exist"
+    InternalServerError:
+      description: "An unexpected error occurred while serving your request"
+
+  schemas:
+    CreateSampleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        amount:
+          type: integer
+          format: int64
+      required:
+        - name
+    SampleDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        amount:
+          type: integer
+          format: int64

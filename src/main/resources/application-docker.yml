@@ -1,0 +1,15 @@
+logging:
+  config: classpath:docker-log-config.xml
+
+spring:
+  exposed:
+    generate-ddl: false
+  datasource:
+    url: jdbc:postgresql://${DATABASE_ENDPOINT}:5432/${DATABASE_NAME}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driverClassName: org.postgresql.Driver
+  flyway:
+    default-schema: microservice_template_schema
+    schemas: microservice_template_schema
+    create-schemas: false

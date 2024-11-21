@@ -1,0 +1,90 @@
+plugins {
+	id 'org.jetbrains.kotlin.jvm' version '1.9.25'
+	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
+	id 'org.springframework.boot' version '3.3.5'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id "org.openapi.generator" version "7.8.0"
+}
+
+apply plugin: 'org.openapi.generator'
+
+group = 'com.cardino'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	serverBasePackage = "de.cardino.template"
+	serverApiPackage = "${ext.serverBasePackage}.api"
+	serverModelPackage = "${ext.serverApiPackage}.model"
+	set('springModulithVersion', "1.2.4")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-jooq'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-web-services'
+	implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
+	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+	implementation 'org.postgresql:postgresql:42.3.8'
+	implementation 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
+	implementation 'org.jetbrains.kotlin:kotlin-reflect'
+	implementation 'org.springframework.modulith:spring-modulith-starter-core'
+	runtimeOnly 'io.micrometer:micrometer-registry-datadog'
+	runtimeOnly 'org.springframework.modulith:spring-modulith-actuator'
+	runtimeOnly 'org.springframework.modulith:spring-modulith-observability'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+	testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.modulith:spring-modulith-bom:${springModulithVersion}"
+	}
+}
+
+kotlin {
+	compilerOptions {
+		freeCompilerArgs.addAll '-Xjsr305=strict'
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+task generateOpenApiServerCode(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+	dependsOn clean
+	generatorName = "kotlin-spring"
+	inputSpec = "$rootDir/api-definition.yml".toString()
+	outputDir = "$buildDir/generated".toString()
+	configOptions = [
+			basePackage          : project.ext.serverBasePackage,
+			apiPackage           : project.ext.serverApiPackage,
+			modelPackage         : project.ext.serverModelPackage,
+			gradleBuildFile      : "false",
+			interfaceOnly        : "true",
+			useTags              : "true",
+			enumPropertyNaming   : "UPPERCASE",
+			documentationProvider: "source",
+			useSpringBoot3       : "true"
+	]
+}
+
+compileKotlin.dependsOn tasks.generateOpenApiServerCode
+compileKotlin.mustRunAfter(tasks.generateOpenApiServerCode)
+processResources.dependsOn(tasks.generateOpenApiServerCode)
+
+sourceSets.main.kotlin.srcDirs += "${buildDir}/generated/src/main/kotlin"
+sourceSets.main.resources.srcDirs += "${buildDir}/generated/src/main/resources"

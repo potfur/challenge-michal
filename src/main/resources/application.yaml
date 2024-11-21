@@ -1,0 +1,32 @@
+
+management:
+  endpoint:
+    prometheus:
+      enabled:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info,metric
+  datadog:
+    metrics:
+      export:
+        enabled: false
+logging:
+  config: classpath:local-log-config.xml
+
+spring:
+  exposed:
+    generate-ddl: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/test
+    username: test
+    password: test
+    driverClassName: org.postgresql.Driver
+  flyway:
+    default-schema: microservice_template_schema
+    schemas: microservice_template_schema
+    create-schemas: true
