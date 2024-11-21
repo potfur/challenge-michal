@@ -36,7 +36,7 @@ type Equipment {
     name: String!
     value: String!
 }
-```
+```[README.md](README.md)
 
 ## Good to know
 You can use any frameworks you want. You can use any libraries you want. Commit all changes to a Git repository and follow good commit message practice. Focus on good application structure, not a hacky solution.
